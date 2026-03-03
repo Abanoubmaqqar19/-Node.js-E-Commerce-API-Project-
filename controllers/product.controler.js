@@ -1,101 +1,157 @@
 import Product from "../modeles/productsModel.js";
+import HTTPError from "../utils/errorHttp.js";
 
 // ===============================
-// GET ALL
+// GET ALL PRODUCTS
 // ===============================
-export const getAllproducts = async (req, res) => {
+export const getAllproducts = async (req, res, next) => {
   try {
-    const products = await Product.getAllproducts();
-    return res.status(200).json(products);
+    const products = await Product.find();
+
+    return res.status(200).json({
+      message: "Products fetched successfully",
+      count: products.length,
+      products,
+    });
   } catch (err) {
-    return res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 };
 
 // ===============================
-// GET BY ID
+// GET PRODUCT BY ID
 // ===============================
-export const getProductByID = async (req, res) => {
+export const getProductByID = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.getProductByID(id);
+    const product = await Product.findById(id);
 
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return next(new HTTPError(404, "Product not found"));
+    }
 
-    return res.status(200).json(product);
+    return res.status(200).json({
+      message: "Product fetched successfully",
+      product,
+    });
   } catch (err) {
-    return res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 };
 
 // ===============================
-// REPLACE (PUT)
+// DELETE PRODUCT
 // ===============================
-export const replaceProductByID = async (req, res) => {
+export const deleteProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return next(new HTTPError(404, "Product not found"));
+    }
+
+    await product.deleteOne();
+
+    return res.status(200).json({
+      message: "Product deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ===============================
+// REPLACE PRODUCT (PUT)
+// ===============================
+export const replaceProductByID = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, price, categoryId } = req.body;
 
-    if (!name || !price || !categoryId)
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!name || !price || !categoryId) {
+      return next(new HTTPError(400, "All fields are required"));
+    }
 
-    const existing = await Product.getProductByID(id);
+    const product = await Product.findById(id);
 
-    if (!existing)
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return next(new HTTPError(404, "Product not found"));
+    }
 
-    await Product.deleteProduct(id);
-    const newProduct = await Product.addProduct({
-      name,
-      price,
-      categoryId,
+    product.name = name;
+    product.price = price;
+    product.categoryId = categoryId;
+
+    await product.save();
+
+    return res.status(200).json({
+      message: "Product replaced successfully",
+      product,
     });
-
-    return res.status(200).json(newProduct);
   } catch (err) {
-    return res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 };
 
 // ===============================
 // UPDATE PRICE (PATCH)
 // ===============================
-export const updateProductPrice = async (req, res) => {
+export const updateProductPrice = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { price } = req.body;
 
     if (!price) {
-      return res.status(400).json({ message: "Price is required" });
+      return next(new HTTPError(400, "Price is required"));
     }
 
-    const updatedProduct = await Product.updateProductPrice(id, price);
+    const product = await Product.findById(id);
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return next(new HTTPError(404, "Product not found"));
     }
 
-    return res.status(200).json(updatedProduct);
+    product.price = price;
+
+    await product.save();
+
+    return res.status(200).json({
+      message: "Price updated successfully",
+      product,
+    });
   } catch (err) {
-    return res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 };
-    
 
-// ===============================
-// DELETE
-// ===============================
-export const deleteProduct = async (req, res) => {
+// ****************/
+//! Add product
+//*************** */
+
+
+export const addProduct = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { name, price, categoryId } = req.body;
 
-    const deleted = await Product.deleteProduct(id);
+    // Validation basic check
+    if (!name || !price || !categoryId) {
+      return next(new HTTPError(400, "Missing required fields"));
+    }
 
-    if (!deleted) return res.status(404).json({ message: "Product not found" });
+    const product = await Product.create({
+      name,
+      price,
+      categoryId,
+    });
 
-    return res.status(200).json({ message: "Product deleted successfully" });
+    return res.status(201).json({
+      message: "Product created successfully",
+      product,
+    });
   } catch (err) {
-    return res.status(500).json({ message: "Server Error" });
+    next(err); // go to global error handler
   }
 };

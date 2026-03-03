@@ -5,6 +5,7 @@ import {
   deleteProduct,
   replaceProductByID,
   updateProductPrice,
+  addProduct,
 } from "../../controllers/product.controler.js";
 
 const router = Router();
@@ -37,6 +38,10 @@ router.put("/:id", replaceProductByID);
 // UPDATE PRICE (PATCH)
 // PATCH /api/products/:id/price
 // =======================
-router.patch("/:id/price", updateProductPrice);
+router.patch("/:id", updateProductPrice);
 
+
+//* POST /api/products
+// =======================
+router.post("/", addProduct);
 export default router;

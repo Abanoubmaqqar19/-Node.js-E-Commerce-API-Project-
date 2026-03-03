@@ -33,7 +33,7 @@ router.post('/', addUser)
 
 
 // dynamic routes
-router.get("/:idd", getUserByID);
+router.get("/:id", getUserByID);
 
 
 

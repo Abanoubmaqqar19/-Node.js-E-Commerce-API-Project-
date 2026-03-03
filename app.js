@@ -10,7 +10,7 @@ import productRouter from "./routes/ProductRoutes/product.router.js";
 import authMW from "./middelwares/authMW.js";
 import custemRegstrMW from "./middelwares/custemRegstrMW.js";
 import notFoundMW from "./middelwares/notFoundMW.js";
-
+ import errorHandilingMW from "./middelwares/errorHandilingMW.js";
 
 
 const app = express();
@@ -35,10 +35,15 @@ app.use("/api/users", userRouter);
 
 
 app.use("/api/categories", categoryRouter);
-app.use("/api/product", productRouter);
+app.use("/api/products", productRouter);
 
 //not found
 // start with / and no have routes
 app.use(notFoundMW);
+
+
+
+// error handiling 
+app.use(errorHandilingMW);
 
 export default app;
