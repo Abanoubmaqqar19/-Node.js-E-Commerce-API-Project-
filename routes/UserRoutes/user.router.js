@@ -9,6 +9,12 @@ import {
   addUser,
 } from "../../controllers/user.controler.js";
 
+import {
+  createUserValidator,
+  idParamValidator,
+  updatePasswordValidator,
+} from "../../validation/userValidatorMW.js";
+import validationResult  from "../../validation/validationResult.js";
 
 const router = Router();
 
@@ -22,10 +28,14 @@ router.get('/validate',(req, res) => {
          return res.status(200).send(`validat NOT success `);
    
 })
+
+
+
+router.post("/",createUserValidator,validationResult, addUser);
 router.get('/',getAllUsers)
-router.patch('/:id', updateUserPWD)
-router.delete('/:id', deleteUser)
-router.post('/', addUser)
+router.patch('/:id',updatePasswordValidator,validationResult, updateUserPWD)
+router.delete("/:id", idParamValidator, validationResult,deleteUser);
+
 
 
 
@@ -33,7 +43,7 @@ router.post('/', addUser)
 
 
 // dynamic routes
-router.get("/:id", getUserByID);
+router.get("/:id", idParamValidator,validationResult, getUserByID);
 
 
 
