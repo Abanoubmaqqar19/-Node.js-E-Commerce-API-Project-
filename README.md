@@ -64,9 +64,7 @@ The project uses the following NPM packages:
 
 ---
 
-
-- **Badges**: Node.js version, Express, MongoDB, npm، وStatus Active  
-- **Table of Contents** 
+ 
 
 ## Author
 
